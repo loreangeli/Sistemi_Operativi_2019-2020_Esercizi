@@ -1,0 +1,3 @@
+Compilare con:
+gcc -pthread -o es2 es2.c
+./es2

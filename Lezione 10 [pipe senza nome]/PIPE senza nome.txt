@@ -1,0 +1,24 @@
+PIPE SENZA NOME -> è condivisa tra processi discendenti
+pfd[0]->lettura
+pfd[1]->scrittura
+0->stdin
+1->stdout
+dup2(channel[1],1); //con questo comando se scrivo su 1 scrivo dentro channel[1]. Questo comando chiude anche il descrittore 1 (stdout).
+fpathconf->da errore <=> ritorna -1 e errno!=0 (ricordiamo di settarlo a 0 prima). Altrimenti ritorna la capacità reale del buffer. Può restituire -1 ma con errno=-1, in quel caso capacità illimitata.
+Se scrivo più della capacità reale della PIPE non avviene più atomicamente la procedura.
+READ: Leggendo la PIPE i dati vengono tolti da essa. 
+1. Se PIPE vuota e descrittori di scrittura non tutti chiusi attende (si blocca in attesa)
+2. Se i descrittori di scrittura sono tutti chiusi ritorna 0 (eof).
+3. Altrimenti lette al più n byte
+WRITE: Se non esiste alcun lettore sulla PIPE errore pericoloso!
+CLOSE: Quando l'ultimo descrittore di scrittura è chiuso genera l'eof per i lettori facendo ritornare 0 alle read in attesa.
+
+Se creo processi figli (con la fork ad esempio) vengono duplicati i descrittori.
+
+REGOLA D'ORO: Se un descrittore non lo uso, lo chiudo.
+Esempio: Se ho un processo 1 scrittore e un processo 2 lettore:
+Processo 1 chiude pfd[0]
+Processo 2 chiude fpd[1]
+Quando la comunicazione è finita:
+Processo 1 chiude pfd[1]
+Processo 2 chiude pfd[2]

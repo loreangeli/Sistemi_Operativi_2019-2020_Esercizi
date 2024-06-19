@@ -1,0 +1,85 @@
+<static>
+
+{ static int x;
+...
+}
+se utilizzo la parola chiave <static> la variabile x mantiene il proprio valore da una attivazione del blocco alla successiva. Esempio:
+
+#include <stdio.h>
+int fun() {
+static int count=0;
+count++;
+return count;
+}
+
+int main() {
+printf("%d", fun());
+printf("%d", fun());
+
+return 0;
+}
+
+STAMPA: 1 2
+
+-----------------------------------------------------------------------------
+<extern>
+
+Differenza tra dichiarare x vs definire x.
+definire una variabile vuol dire che alloco dello spazio in memoria per essa e la posso definire un sola volta. Se ho una variabile int x=2 non posso avere un altra int x=3 in un altro file perchè il linker non capirebbe quale delle due variabile devo dichiarare.
+Se invece la dichiaro (con extern) la variabile non viene allocata.
+ ----------------------------------------------------------------------------
+Dichiarare funzioni con extern e static. 
+
+Di default tutte le funzioni sono extern. Se invece faccio una funzione static (static int funct(...) { ... } )assume un significato diverso e vuol dire che la funzione è visibile solo nel file che la contiene. Fare questa cosa mi interessa per rendere privata una certa implementazione.  
+
+-----------------------------------------------------------------------------
+.file pluto.
+int z;
+static int K() {
+
+}
+
+int F(int);
+K();
+
+.file pippo.
+extern int z; /* ci devo mettere extern perchè z è già stata dichiarata nel file pluto se non avessi messo extern ci sarebbero state due dichiarazioni in due file diversi e nel momento in cui viene fatto il linking mi tira fuori un errore il compilatore. */
+extern int F();
+
+----------------------------------------------------------------------------
+<Librerie in C>
+
+LIbreria con l'implementazione di tutte le funzioni che ho creato per poter poi andare a chiamare le funzioni senza doverle scrivere ogni volta ma prendendole  da una libreria creata da me. Una Libreria è un archivio di file oggetto, di file che quindi sono già stati compilati. 
+Devo usare un comando "ar":
+ar r nomelibreria.a file1.o fileN.o
+
+Ci sono due tipi di librerie:
+
+1) statiche (.a) --> come si crea? compilo con l'opzione '-c':
+//creazione dei file oggetto:
+gcc -std=c99 -Wall myfunc.c -c -o myfunc1.o
+gcc -std=c99 -Wall myfunc2.c -c -o myfunc2.o
+gcc -std=c99 -Wall errfunc.c -c -o errfunc.o
+//Creazione della libreria statica (compilo con 'ar rvs'):
+ar rvs libmyf.a myfunc1.o myfunc2.o errfunc.o
+//Linking e creazione dell'eseguibile:
+gcc main.c -o myprog -L . -lmyf --> con '-L' gli dico dove si trova la libreria e '-l' dice al pre processore dove trovare gli include.
+
+2) condivise/Dinamiche (.so) ---> come si crea?
+//Creazione dei file oggetto:
+gcc -std=c99 -Wall myfunc.c -c -fPIC -o myfunc1.o 
+...
+//Creazione della libreria dinamica (compilo con '-shared'):
+gcc -shared -o libmyf.so myfunc1.o ....
+//Linking e creazione dell'eseguibile:
+gcc main.c -o myprog -L . -lmyf
+
+
+
+
+
+
+
+
+
+

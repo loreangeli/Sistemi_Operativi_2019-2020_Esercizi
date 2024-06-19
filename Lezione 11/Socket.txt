@@ -1,0 +1,52 @@
+***SOCKETS***
+
+Come collegare due processi?
+<LATO SERVER> 
+1)(socket) creo socket(creando un socket viene restituito un file descriptor). Nell'esempio fd=sfd.
+2)(bind) Si associa al fd ritornato dalla funzione socket un nome. (bind ->lega il socket con il nome del file che 
+gli do).
+3)(listen) Devo far si che il server si metta in modalità passiva. Serve per far si che il socket possa accettare connessioni.
+4)(accept) Ci si mette in attesa, il socket si blocca in attesa che qualcuno si connetta. => A seguito di una
+connect se la accept va a buon fine ritorna un nuovo fd che serve per comunicare con il socket client. (Nell'esempio sfd1)
+
+<LATO CLIENT>
+1)(socket) Creo socket. Nell'esempio fd=csfd
+2)(connect) Il client si deve connettere tramite socket al socket specificato dal server. La connect restituisce un fd per comunicare con 
+il server.
+
+A questo punto uso le classiche write(sfd1..), read(sfd1 ..), close(sfd1..) per il Server e
+write(csfd..), read(csfd..), close(csfd..) per il Client.
+
+
+Nel dettaglio:
+socket: fd=socket(AF_UNIX, SOCK_STREAM, 0);
+accept: se non ci sono connessioni da accettare si mette in attesa, in caso contrario accetta una nuova connessione e
+crea un nuovo socket, ritorna il file descriptor del nuovo socket.
+
+
+ENOENT-> true se non esiste il socket.
+
+Come gestire più client nel client-server?
+Usiamo un server sequenziale e la System Call select() che permette di capire quale file descriptor è "pronto" (con pronto
+si intende: pronto per accettare una nuova connessione o pronto inteso come pronto per leggere su quel descrittore senza bloccarsi).
+La select permette di aspettare che si verifichini degli eventi I/O. 
+
+select(nfds,rdset,wrset,errset,timeout);
+
+nfds: numero dei file descriptor che la select gestisce.
+rdset: maschera di bit che ci dice quali descrittori sono pronti in lettura
+wrset: maschera di bit che ci dice quali descrittori sono pronti in scrittura.
+errset: maschera di biit che ci dice quali descrittori hanno avuto un errore.
+timeout: la select si blocca in attesa di un evento per un tempo pari a timeout e poi ritorna un valore errno. Se timeout=NULL la
+select si blocca in modo indefinito finchè non viene registrato un evento di lettura, scrittura o errore.
+
+SELECT: Il server si accorge del descrittore chiuso perche il client fa close(fd_skt), questo comporta che la select lato server ritorni un evento di lettura (descrittore pronto in lettura -- anche se non c'e' nulla da leggere), quindi il ciclo for lato server identifichera' il descrittore giusto e la successiva read ritornera' 0 (cioe' EOF). Quindi il server lo toglie dalla maschera set con la FD_CLR, etc. In pratica la select si accorge di un evento e cambia il bit della maschera (relativo a un fd) a pronto ogni qualvolta viene creato un socket (nel momento in cui viene fatta la connect), con read/write e anche quando viene chiuso il descrittore tramite close. La ringrazio per la disponibilità.
+
+Cit. Professore !
+Attenzione: i socket sono un meccanismo di comunicazione tra processi sia sulla stessa macchina (AF_UNIX) che fra macchine diverse (AF_INET, etc...). Funziona anche tra thread ma e' come sparare ad una mosca con un cannone.
+
+Il meccanismo principe per la comunicazione tra thread e' a "variabili condivise" protette da mutua esclusione. 
+
+Per casi particolari, si possono usare anche le unnamed pipe (pensate per far comunicare processi parenti). Ma i socket direi che non si usano MAI tra threads.
+
+

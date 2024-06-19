@@ -1,0 +1,6 @@
+Regole per una buona implementazione di esercizi sui Processi e Thread:
+1. Usare wait,signal sempre con le mutex.
+2. Se usiamo le lock dobbiamo in genere usare anche le variabili di condizione.
+3. La wait va chiamata con il ciclo while e non con l'if!
+4. Se esci da un thread ricordati sempre di controllare di aver rilasciato la lock (non viene fatta mai in automatico)!
+

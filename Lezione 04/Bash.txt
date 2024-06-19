@@ -1,0 +1,29 @@
+*****SHELL******
+E' un linguaggio di programmazione interpretato. Questi programmi che creo si possono concatenare tra loro.
+La shell è un programma che gira in spazio utente.
+sintassi tipica di un comando di shell: comando <opzioni> <argomenti> 
+
+CTRL -d --> end of file
+CTRL -c --> stoppa il programma
+
+ALCUNI COMANDI DI BASE
+ls --> fa il listing dei file in una directory
+more, less, cat --> mostrano il contenuto di un file o di più file
+cp, mv --> servono per copiare o spostare file all'interno di directory
+mkdir --> crea una nuova directory
+rm, rmdir ->rimuove file o directory
+wc ->conta parole, linee e caratteri
+cat file1 file2 -->concatena il contenuto di fiile1 e file2 e lo mostra sulla stdout
+cut --> permette di selezionare parti di un file 
+eccetera ... (guarda slide)
+
+tar cvf bash.tar Bash/
+Note: c sta per crea la directory, v per verbose quindi per specificare le informazioni | bash. tar è il nome dell'archivio |
+Bash/ specifica la lista di directory che voglio mettere nell'archivio.
+
+tar tvf bash.tar 
+Note: mi serve per vedere il contenuto dell'archivio
+
+"gzip" serve per comprimere i file
+
+

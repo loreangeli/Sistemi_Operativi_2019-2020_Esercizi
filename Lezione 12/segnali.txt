@@ -1,0 +1,40 @@
+******SEGNALI***** 
+I SEGNALI sono eventi asincroni! Mascherare un signale significa ignorarlo!
+
+Nel progetto e anche nella vita:
+-SIGPIPE va ignorato sempre.
+-SIGINT e SIGTERM vanno gestiti per uscire in modo pulito dal sistema.
+-SIGSEGV non va gestita, se c'è un errore vogliamo vederlo.
+
+Quando arriva a un processo un segnale può decidere di intramprendere alcune azioni:
+-ignorarlo
+-lasciarlo gestire al kernel
+-specificare una funzione che lo gestisce (signal handler)
+
+STRUTTURE DATI DEL KERNEL PER I SEGNALI:
+1)Il signal handler array è una struttura (ogni processo ne ha una, condiviso tra thread dello stesso processo) che può avere tre valori:
+-ignorarlo
+-lasciarlo gestire al kernel
+-specificare una funzione che lo gestisce (signal handler)
+2)pending signal bitmap (ce n'è una per ogni thread): ha un bit per ogni segnale.
+Se il bit X è a 1 c'è un segnale pendente di tipo X. 
+3)signal masks (ce n'è una per ogni thread): il bit è a 1 se non voglio ricevere segnali,
+se voglio mascherarlo.
+
+Tipicamente i segnali vengono controllati al ritorno delle SC (system Call).
+
+Come realizzo l'handler? In generale deve essere una funzione rientrante rispetto ai segnali. 
+Il signal handler deve essere breve e semplice, non si possono chiamare tutte le funzioni che ci pare ma solo
+le funzioni che si trovano a "man signal-safety".
+Aprire file nel signal handler è sbagliato. Le printf(usare write) si usano solo per debugging altrimenti non vanno usate. Usare mutex è sbagliato! Lo stesso vale per
+i semafori. Attenzioni ad usare variabili globali, se lo devo fare queste devono essere dichiarate "volatile sig_atomic_t".
+
+Come si associano le maschere di bit ai segnali? Con la pthread_sigmask.
+pthread_sigmask: cambia la maschera al thread.
+pthread_kill: si possono mandare solo segnali sintetici ad altri thread dello stesso processo. Conviene usarla solo per segnali per cui è stato installato un gestore.
+
+Mi posso mettere in attesa che arrivi un segnale?
+pause(): evitare come la peste!
+Usare sigwait().
+
+EINTR: errore di chiamata interrotta.

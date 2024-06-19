@@ -1,0 +1,20 @@
+Il senso dell'esercizio e' quello di riuscire a far avanzare i filosofi nelle loro attività in modo concorrente.  Lo schema che deve implementare e' quello proposto da Dijkstra per evitare deadlock in cui viene fissato un ordinamento sull'indice delle forchette (o bacchette) e questo ordinamento e' lo stesso per tutti i thread filosofi. Lo pseudo codice dello schema e' (supponendo di numerare i filosofi da 1 ad N):
+ int left    = myid % N;
+ int right   = myid-1;
+
+for(...) {
+    Pensa();
+    if (left < right) {
+       Lock(destra);
+       Lock(sinistra);
+       Mangia();
+       Unlock(sinistra);
+       Unlock(destra);
+    } else {
+       Lock(sinistra);
+       Lock(destra);
+       Mangia();
+       Unlock(destra);
+       Unlock(sinistra);
+   }
+}

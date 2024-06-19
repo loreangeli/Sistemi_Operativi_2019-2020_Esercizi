@@ -1,0 +1,23 @@
+Una vostra collega mi ha chiesto chiarimenti in merito al linking di librerie statiche e dinamiche, in particolare relativamente alla variabile d'ambiente LD_LIBRARY_PATH ed ai flag di compilazione da passare al linker -Wl, rpath. 
+Scrivo di seguito la mia risposta in modo che possa essere utile anche ad altri che hanno lo stesso dubbio.
+Per rispondere, parto ricordando la differenza tra librerie statica e dinamica: con una libreria statica, nella fase di linking, viene creato un unico file eseguibile, mentre con una libreria dinamica, nella fase di linking, vengono solo controllati i simboli e l'eseguibile creato non avra' il codice delle funzioni/procedure/simboli della libreria ma avra' solo dei riferimenti ad essi. Per cui in questo secondo caso, quando l'eseguibile viene caricato in memoria per essere eseguito, il loader, dovra' necessariamente caricare anche le librerie dinamice che permette di risolvere tutti i riferimenti alle librerie stesse. 
+Come fa il loader a trovare la libreria da caricare?
+E' qui che entra in gioco le opzioni -Wl e/o la variabile d'ambiente LD_LIBRARY_PATH.  Partiamo da quest'ultima: LD_LIBRARY_PATH e' una variabile d'ambiente, che contiene path separati da ':', che il loader legge al momento del caricamento del programma per cercare le librerie dinamiche. Quindi scrivere:
+LD_LIBRARY_PATH="./mylibdir1:./mylibdir2"  eseguibile argomenti
+dice al loader di cercare le librerie dinamiche da caricare per l'eseguibile in mylibdir1 e mylibdir2. Se le trova, ok, altrimenti da errore perche' appunto non riesce a risolvere dei riferimenti. 
+L'utilizzo della variabile d'ambiente LD_LIBRARY_PATH e' molto flessibile perche' se cambio il nome delle directories dove ho messo le libririe, basta che risetto tale variabile. 
+La variabile puo' essere settata in modo "permanente" mettendo un comando di export nel file .bashrc contenuto nella home dell'utente, es:
+export LD_LIBRARY_PATH="./mylibdir1:./mylibdir2:/usr/local/mylibdir3: ........."
+Vediamo ora -Wl, rpath. Questo e' un modo alternativo, ed in un certo senso memo flessibile dell'ultilizzo di LD_LIBRARY_PATH.
+All'atto della compilazione, viene detto al linker di aggiungere delle informazioni per il loader nell'intestazione del file eseguibile che verra' prodotto. Quindi se mentre compilo scrivo:
+... -Wl, rpath=./mylibdir1,-rpath=./mylibdir2
+il linker scrivera' i due path in un'apposita zona del file eseguibile prodotto, ed il loader cerchera' le librerie dinamiche che deve caricare sia in mylibdir1 che in mylibdir2. Come prima, se le trova ok, altrimenti da errore. 
+Ho detto che questo approccio e' meno flessibile perche' per cambiare i path, nel caso decidessi di spostare le libririe in altri path, devo utilizzare un apposito programma (chrpath) oppure devo ri-linkare passando i nuovi path.
+Altra questione: a cosa serve  -L <path>? Non posso specificare il path assoluto alle librerie?
+Allora, -L e' un flag che dice al linker (attezione non c'entra nulla con la questione di prima che invece ha a che fare con il loader) dove trovare le librerie (che siano esse statiche o dinamiche) per controllare i vari simboli esportati/esterni dei vari moduli che sto' compilando.
+l fatto di usare -L path piuttosto che il path assoluto della libreria e' perche' puo' capitare che in una sola directory ci siano molte librerie da linkare e specificare per ognuna il path assoluto puo' essere pesante.
+Ad esempio se scrivo :
+-L /usr/local/lib -lprima -lseconda ..... -lennesima
+e' diverso che scrivere 
+/usr/local/lib/libprima.so /usr/local/lib/libseconda.so .... etc.
+

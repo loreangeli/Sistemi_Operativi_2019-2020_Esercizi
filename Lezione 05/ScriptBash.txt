@@ -1,0 +1,32 @@
+find . -name "$1" -exec rm \-i {} \;;
+NOTA: il "." indica che viene eseguito il comando find a partire dalla directory corrente. L'opzione "i" sta per interactive e serve a far si che mi venga chiesto se voglio fare la remove.
+
+bash:~$. ./myfunctions -- o source 
+NOTA: con il comando "." mi carica in memoria il file, all'ambiente della shell corrente.
+
+*****ESEMPIO I/O BASH******
+
+exec 3<inputfile
+exec 4>outputfile
+
+NOTA: quello che faccio è associare in lettura ("<")il nome del file e lo associo al descrittore 3. Si parte dal descrittore 3 perchè 0 e 1 sono utilizzati. 0 è associato allo standard input, 1 allo standard output e 2 allo standard error. Mentre il secondo descrittore, cioè 4 lo associo all'output file con il ">" quindi in scrittura.
+
+i=0
+while read -u 3 linea; do
+	A[$i]=$linea
+	(( i++ ))
+done
+
+NOTA: "read" mi permette di specificare il descrittore da cui voglio leggere. La "read" mi legge fino a fine riga del file. 
+
+for ((j=$i-1 ; j>-1 ;j--)) ; do
+	echo ${A[$j]} 1>&4 
+done
+NOTA: L'operazione "1>&4" vuol dire: (1 sta per standard output) lo standard output viene rediretto sul descrittore 4 che corrisponde al file outputfile.
+*******************************
+bash:~$ rm -f miao/{lib.{?,??},*~,??.log}
+
+NOTA: "?" e "??" vuol dire che prende qualsiasi file "lib." che termina con uno o due caratteri qualsiasi.
+
+
+

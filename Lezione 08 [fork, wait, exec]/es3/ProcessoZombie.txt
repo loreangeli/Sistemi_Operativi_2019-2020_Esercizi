@@ -1,0 +1,8 @@
+Processo Zombie: è un processo che è terminato ma che possiede ancora un PID (si trova nel PCB) e un PCB che serve al processo padre per leggere il suo valore di uscita.
+Origine Processi Zombie: Quando un processo termina le risorse e la memoria associata al processo vengono deallocate. Ciò nonostante il PCB e il PID rimane nella tabella dei processi affinchè il processo padre possa leggere il suo stato di ritorno tramite la wait. A seguito della wait il processo viene definitivamente rimosso. 
+Come rimuovere un processo zombie? Vedi Wikipedia.
+
+NOTA: Testo tratto da Wikipedia. 
+
+Per vedere se ci sono processi zombie(Z) utilizzare il comando:
+ps -l

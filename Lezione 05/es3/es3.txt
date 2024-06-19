@@ -1,0 +1,3 @@
+NOTA: Nell'esempio stampo la lista di tutti i nomi di file contenuti nella propria home che sono stati modificati negli ultimi '2' minuti e che contengono al loro interno la parola 'tree'
+
+find -type f -mmin 2 | grep "tree"

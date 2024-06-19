@@ -1,0 +1,6 @@
+COME CREARE UNA LIBRERIA DINAMICA che contiene i file "binarytree.c", "binarytree.h", "utils.h" e il file main "myprog.c"
+
+gcc -std=c99 -Wall binarytree.c -c -fPIC -o binarytree.o
+gcc -shared -o libmyf.so binarytree.o
+gcc myprog.c -o myprog -Wl,-rpath,./ -L. -lmyf
+./myprog 5 -2 28
