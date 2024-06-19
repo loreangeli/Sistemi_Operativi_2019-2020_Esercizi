@@ -1,0 +1,73 @@
+####### SYSTEM CALL #######
+
+Nel mondo UNIX praticamente tutto è un file o viene rappresentato da file, un file è rappresentato con una struttura dati
+che è chiamata i-node. Essa contiene la descrizione di caratteristiche del file (tipo di file), tipo di protezione ecc, Major e Minor device (serve per capire quale driver dovrà prendere 
+in gestione l'operazione che dovrà essere eseguita).
+
+Una directory è a sua volta un file e come tale ha un i-nodo con un puntatore diretto alla lista dei file contenuti in quella directory
+con i relativi indice dell'i-nodo di questi file specifici contenuti nella directory per poter risalire a questi file. Per ogni directory
+ci sono due directory dove la prima chiamata .(punto) contiene un puntatore all'i-node della directory (che contiene i file della directory) e un altra directory che sarebbe la directory 
+padre chiamata ..(punto punto) che punta alla directory .(punto). 
+
+Il superblocco è il primo blocco occupato dal disco e contiene informazioni relative al file system(dimensione del file system, lista dei blocchi liberi ecc).
+
+Un FILE SYSTEM di UNIX ha una parte che contiene i file di booting del sistema operativo, una parte chiamata super blocco, una parte di i-node 
+e una parte di blocchi di dati veri e propri.
+
+
+#open# serve per aprire un file: open(nomefile, flag: diritti di accesso, permessi: user, group, other);
+Viene presa la maschera umask e viene fatto: permessi AND COMPLEMENTO(umask).
+Se tutto va a buon fine la open mi restituisce fd che è un intero/indice della tabella dei descrittori altrimenti ritorna -1. 
+Gli fd 0|1|2 di default corrispondono allo stdin|stdout|stderr. Sarà quindi restituito da fd un numero>2.
+flag: O_CREAT e il file non esiste devo completare la maschera dei permessi!
+O_RDONLY: file accessibile in sola lettura
+esempio di maschera -> 0022. il primo 0 per un attimo non ci interessa; 
+il secondo 0 vuol dire: User
+il primo 1 vuol dire: Gruppo
+il secondo 1 vuol dire: Other
+0022 sono in ottali->in binari corrispondono a 000 000 010 010 
+0666 diventa in binario--> 000 110(r w -) 110 (r - -) 110 (r - -)
+
+
+#read# serve per leggere un file
+buffer -->puntatore all'indirizzo in cui mi verranno salvati i dati letti
+nbytes--> byte che devono essere letti
+read restituisce: -1 errore 0 se siamo a fine file n>0: numero di byte letti
+
+
+#write# serve per scrivere su un file
+-1: errore n>=0: numero di byte scritti
+Esempio: write(1, buf, long) -->scrivo sullo stdout 1! (lo posso fare)
+La write con 0_APPEND è atomica!!
+
+
+#close#
+Non garantisce il flashing dei dati che sono bufferizzati nel nucleo. Abbiamo detto che per quanto riguarda la libreria standard fread e fwrite
+sono operazioni bufferizzate.
+close: errore -1 --> può fallire perchè il kernel all'atto della close può scrivere dati su disco e in quel caso la scrittura può fallire e la close 
+fallisce.
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+||  ATTENZIONE:                                                                                            ||
+||  Non bisogna mescolare chiamate di libreria(fread, fwrite ..) con chiamate di sistema (read, write ..). ||
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+#unlink# cancella file 
+lo elimina solo se il contatore degli hardlink del file va a 0 altrimenti decrementa quel contatore. 
+
+
+#lseek# si posiziona in un file in una certa posizione
+whence -> ci indica in che modo debba essere calcolato l'offset. (ci sono dei flag apposta da usare)
+
+
+#stat# legge i metadati contenuti in un i-node di un file
+Prende un nome di (path) e legge le info (attributi) contenuti nell'i-node e li memorizza in un buffer di tipo struct stat* buf. 
+Questa struttura struct stat contiene diverse informazioni.
+
+#fstat#
+Prende un descrittore di file
+
+Noi utilizzeremo chiamate di libreria POSIX per le directory perchè le chiamate di sistema sono troppo a basso livello.
+Noi usiamo man 3 readdir accediamo alla funzione di libria! Se chiamiamo man 2 readdir accediamo alla funzione di sistema.
+
